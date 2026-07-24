@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>夏休みの地理ゲーム 貿易ハンター</title>
+<style>
+  :root{
+    --bg:#fff8e8;
+    --card:#ffffff;
+    --ink:#243044;
+    --accent:#ff8a3d;
+    --accent2:#2f7de1;
+    --ok:#2d9d62;
+    --ng:#d94b4b;
+    --soft:#eef4ff;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;
+    background:linear-gradient(180deg,#fff7df,#eef6ff);
+    color:var(--ink); min-height:100vh;
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:22px 16px 40px}
+  .hero{text-align:center;padding:10px 0 18px}
+  h1{font-size:clamp(28px,6vw,48px);margin:4px 0 8px}
+  .sub{font-size:15px;opacity:.75}
+  .badge{
+    display:inline-block;background:#fff;border:2px solid var(--accent);color:#9a4b18;
+    border-radius:999px;padding:6px 12px;font-weight:700;margin-top:8px
+  }
+  .card{
+    background:var(--card);border-radius:24px;padding:22px;
+    box-shadow:0 14px 30px rgba(54,76,112,.13);
+  }
+  .top{
+    display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:16px
+  }
+  .meter{height:10px;background:#e9edf3;border-radius:999px;overflow:hidden;flex:1}
+  .meter > div{height:100%;background:linear-gradient(90deg,var(--accent),#ffca54);width:0%}
+  .score{font-weight:800;white-space:nowrap}
+  .kind{font-size:14px;color:var(--accent2);font-weight:800;margin-bottom:8px}
+  .q{font-size:clamp(22px,4vw,30px);font-weight:900;line-height:1.35;margin:6px 0 18px}
+  .choices{display:grid;gap:12px}
+  button{
+    border:none;border-radius:16px;padding:16px 18px;font-size:18px;font-weight:800;
+    background:var(--soft);color:var(--ink);text-align:left;cursor:pointer
+  }
+  button:active{transform:scale(.99)}
+  button.correct{background:#e3f7ec;color:#1d6e45}
+  button.wrong{background:#fde8e8;color:#9a2c2c}
+  .feedback{
+    min-height:58px;margin-top:16px;padding:12px 14px;border-radius:14px;
+    background:#f7f9fc;font-size:15px;line-height:1.55
+  }
+  .next{
+    margin-top:14px;width:100%;text-align:center;background:var(--accent);color:#fff;
+  }
+  .hidden{display:none}
+  .result{text-align:center}
+  .result .big{font-size:64px;margin:8px 0}
+  .result h2{font-size:30px;margin:0 0 8px}
+  .note{font-size:14px;opacity:.72;margin-top:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <div class="badge">Project AIノオト #001</div>
+    <h1>夏休みの地理ゲーム<br>貿易ハンター</h1>
+    <div class="sub">日本の輸出入を、クイズで楽しく覚えよう！</div>
+  </div>
+
+  <div class="card" id="game">
+    <div class="top">
+      <div class="meter"><div id="bar"></div></div>
+      <div class="score" id="score">0点</div>
+    </div>
+    <div class="kind" id="kind"></div>
+    <div class="q" id="question"></div>
+    <div class="choices" id="choices"></div>
+    <div class="feedback" id="feedback">答えを選んでね。</div>
+    <button class="next hidden" id="next">次の問題へ →</button>
+  </div>
+
+  <div class="card result hidden" id="result">
+    <div class="big">🌏</div>
+    <h2 id="resultTitle"></h2>
+    <p id="resultText"></p>
+    <button class="next" id="retry">もう一度あそぶ</button>
+    <div class="note">出典：添付プリント「貿易（2023年）」をもとに試作</div>
+  </div>
+</div>
+
+<script>
+const questions = [
+  {
+    kind:"輸出ランキング",
+    q:"日本の自動車の輸出先、第1位はどこ？",
+    choices:["アメリカ","中国","オーストラリア"],
+    answer:0,
+    exp:"正解はアメリカ。日本の自動車輸出の約34％を占めます。"
+  },
+  {
+    kind:"輸出ランキング",
+    q:"日本の自動車の輸出先、第2位はどこ？",
+    choices:["カナダ","オーストラリア","サウジアラビア"],
+    answer:1,
+    exp:"第2位はオーストラリア。コアラの国へ日本車がたくさん渡っています。"
+  },
+  {
+    kind:"輸出ランキング",
+    q:"集積回路の輸出先、第1位はどこ？",
+    choices:["中国","台湾","韓国"],
+    answer:0,
+    exp:"第1位は中国。続いて台湾、香港、韓国です。"
+  },
+  {
+    kind:"輸出ランキング",
+    q:"半導体等製造装置の輸出先、第1位はどこ？",
+    choices:["アメリカ","中国","台湾"],
+    answer:1,
+    exp:"第1位は中国。割合は約43％で、とても大きいです。"
+  },
+  {
+    kind:"輸出ランキング",
+    q:"鉄鋼の輸出先、第1位はどこ？",
+    choices:["韓国","タイ","中国"],
+    answer:0,
+    exp:"第1位は韓国。タイ、中国が続きます。"
+  },
+  {
+    kind:"輸入ランキング",
+    q:"日本が原油を最も多く輸入している国はどこ？",
+    choices:["アメリカ","サウジアラビア","オーストラリア"],
+    answer:1,
+    exp:"第1位はサウジアラビア。次いでアラブ首長国連邦です。"
+  },
+  {
+    kind:"輸入ランキング",
+    q:"液化石油ガス（LPG）の輸入先、第1位はどこ？",
+    choices:["アメリカ","サウジアラビア","カタール"],
+    answer:0,
+    exp:"第1位はアメリカ。割合は約63％です。"
+  },
+  {
+    kind:"輸入ランキング",
+    q:"液化天然ガス（LNG）の輸入先、第1位はどこ？",
+    choices:["ロシア","オーストラリア","マレーシア"],
+    answer:1,
+    exp:"第1位はオーストラリア。日本のエネルギーを支える大切な相手国です。"
+  },
+  {
+    kind:"特徴をつかもう",
+    q:"日本の輸出で、いろいろな国との取引に多く登場する品目は？",
+    choices:["機械類","小麦","衣類"],
+    answer:0,
+    exp:"機械類が目立ちます。自動車、半導体、製造装置などが日本の代表的な輸出品です。"
+  },
+  {
+    kind:"特徴をつかもう",
+    q:"日本の輸入先で、中国・アメリカ・韓国が多く登場する理由として近いものは？",
+    choices:["距離や経済の結びつきが強いから","日本語が通じるから","同じ通貨を使うから"],
+    answer:0,
+    exp:"近さに加え、産業・貿易の結びつきが強いことが大きな理由です。"
+  }
+];
+
+let index = 0, score = 0, locked = false;
+
+const qEl = document.getElementById("question");
+const kindEl = document.getElementById("kind");
+const choicesEl = document.getElementById("choices");
+const feedbackEl = document.getElementById("feedback");
+const nextBtn = document.getElementById("next");
+const scoreEl = document.getElementById("score");
+const bar = document.getElementById("bar");
+
+function render(){
+  locked = false;
+  const item = questions[index];
+  kindEl.textContent = `第${index+1}問 / ${questions.length}　${item.kind}`;
+  qEl.textContent = item.q;
+  choicesEl.innerHTML = "";
+  feedbackEl.textContent = "答えを選んでね。";
+  nextBtn.classList.add("hidden");
+  item.choices.forEach((c,i)=>{
+    const b = document.createElement("button");
+    b.textContent = `${["A","B","C"][i]}　${c}`;
+    b.onclick = ()=>answer(i,b);
+    choicesEl.appendChild(b);
+  });
+  bar.style.width = `${(index/questions.length)*100}%`;
+  scoreEl.textContent = `${score}点`;
+}
+
+function answer(i,btn){
+  if(locked) return;
+  locked = true;
+  const item = questions[index];
+  const buttons = [...choicesEl.querySelectorAll("button")];
+  buttons[item.answer].classList.add("correct");
+  if(i === item.answer){
+    score += 10;
+    feedbackEl.textContent = "🎉 正解！ " + item.exp;
+  }else{
+    btn.classList.add("wrong");
+    feedbackEl.textContent = "おしい！ " + item.exp;
+  }
+  scoreEl.textContent = `${score}点`;
+  nextBtn.classList.remove("hidden");
+}
+
+nextBtn.onclick = ()=>{
+  index++;
+  if(index < questions.length) render();
+  else finish();
+};
+
+function finish(){
+  bar.style.width = "100%";
+  document.getElementById("game").classList.add("hidden");
+  document.getElementById("result").classList.remove("hidden");
+  const title = score >= 90 ? "伝説の貿易ハンター！" : score >= 70 ? "すごい、世界商人級！" : "ナイスチャレンジ！";
+  document.getElementById("resultTitle").textContent = title;
+  document.getElementById("resultText").textContent = `${score}点でした。まちがえた問題をもう一度やると、記憶がもっと強くなるよ。`;
+}
+
+document.getElementById("retry").onclick = ()=>{
+  index = 0; score = 0;
+  document.getElementById("result").classList.add("hidden");
+  document.getElementById("game").classList.remove("hidden");
+  render();
+};
+
+render();
+</script>
+</body>
+</html>
