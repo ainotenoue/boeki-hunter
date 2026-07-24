@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#fff7df">
+<title>夏休みの地理ゲーム 貿易ハンター</title>
+<style>
+:root{
+  --ink:#243044; --muted:#6b7890; --card:#fff;
+  --orange:#ff8738; --blue:#2e7ddd; --purple:#875ed1;
+  --soft:#eef4ff; --ok:#e2f7eb; --ng:#fde8e8;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; min-height:100vh;
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;
+  color:var(--ink);
+  background:linear-gradient(180deg,#fff7df,#edf6ff);
+}
+button{font:inherit}
+.wrap{max-width:820px;margin:auto;padding:20px 16px 44px}
+.screen{display:none}.screen.active{display:block}
+.brand{text-align:center;padding:8px 0 18px}
+.badge{
+  display:inline-block;background:#fff;border:2px solid var(--orange);
+  color:#9b4a18;border-radius:999px;padding:6px 12px;font-size:13px;font-weight:900
+}
+h1{font-size:clamp(31px,6vw,50px);line-height:1.15;margin:12px 0 8px}
+.lead{color:var(--muted);font-weight:800}
+.card{
+  background:var(--card);border-radius:26px;padding:22px;
+  box-shadow:0 16px 34px rgba(54,76,112,.14)
+}
+.menu-title{text-align:center;font-size:22px;font-weight:900;margin:0 0 5px}
+.menu-sub{text-align:center;color:var(--muted);margin:0 0 18px}
+.menu-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.menu{
+  border:0;border-radius:22px;min-height:170px;padding:20px 12px;color:#fff;
+  text-align:center;cursor:pointer;box-shadow:0 10px 20px rgba(36,48,68,.12)
+}
+.menu:active,.choice:active,.main-btn:active,.home-btn:active{transform:scale(.985)}
+.export{background:linear-gradient(145deg,#ff9b55,#ff7330)}
+.import{background:linear-gradient(145deg,#4b94ef,#246bc9)}
+.country{background:linear-gradient(145deg,#9b79df,#7448c2)}
+.icon{font-size:48px;display:block;margin-bottom:5px}
+.jp{font-size:25px;font-weight:900;display:block}
+.en{display:block;font-size:15px;font-weight:900;letter-spacing:.13em;margin-top:2px}
+.desc{display:block;font-size:13px;line-height:1.45;margin-top:10px}
+.game-top{display:flex;align-items:center;gap:12px;margin-bottom:15px}
+.home-btn{
+  border:0;background:#f0f3f8;color:var(--ink);border-radius:14px;
+  padding:10px 12px;font-weight:900;cursor:pointer
+}
+.meter{height:10px;background:#e8edf4;border-radius:999px;overflow:hidden;flex:1}
+.meter div{height:100%;width:0;background:linear-gradient(90deg,var(--orange),#ffd05c)}
+.score{font-weight:900;white-space:nowrap}
+.mode{
+  display:inline-block;border-radius:999px;padding:7px 11px;color:#fff;
+  font-size:13px;font-weight:900;margin-bottom:10px
+}
+.mode.export{background:var(--orange)}
+.mode.import{background:var(--blue)}
+.mode.country{background:var(--purple)}
+.question{font-size:clamp(23px,4.4vw,32px);font-weight:900;line-height:1.4;margin:4px 0 18px}
+.choices{display:grid;gap:12px}
+.choice{
+  border:0;border-radius:17px;padding:16px 18px;background:var(--soft);
+  color:var(--ink);font-size:18px;font-weight:900;text-align:left;cursor:pointer
+}
+.choice.correct{background:var(--ok);color:#1d7047}
+.choice.wrong{background:var(--ng);color:#9c3030}
+.feedback{
+  min-height:66px;margin-top:15px;padding:13px 15px;border-radius:15px;
+  background:#f7f9fc;line-height:1.6;font-size:15px
+}
+.main-btn{
+  width:100%;border:0;border-radius:17px;padding:16px;margin-top:14px;
+  background:var(--orange);color:#fff;font-size:18px;font-weight:900;cursor:pointer
+}
+.hidden{display:none!important}
+.result{text-align:center}
+.result .emoji{font-size:70px}
+.result h2{font-size:31px;margin:4px 0 8px}
+.result p{color:var(--muted);line-height:1.7}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.secondary{background:#edf1f7;color:var(--ink)}
+@media(max-width:650px){
+  .menu-grid{grid-template-columns:1fr}
+  .menu{min-height:128px}
+  .icon{font-size:40px}
+  .actions{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<section id="home" class="screen active">
+  <div class="brand">
+    <span class="badge">Project AIノオト #001</span>
+    <h1>夏休みの地理ゲーム<br>貿易ハンター</h1>
+    <div class="lead">日本の輸出入を、遊びながら覚えよう！</div>
+  </div>
+  <div class="card">
+    <p class="menu-title">どのステージに挑戦する？</p>
+    <p class="menu-sub">好きなテーマを選んでスタート</p>
+    <div class="menu-grid">
+      <button class="menu export" data-mode="export">
+        <span class="icon">🚢</span>
+        <span class="jp">輸出</span>
+        <span class="en">EXPORT</span>
+        <span class="desc">日本から外国へ<br>何を・どこへ送る？</span>
+      </button>
+      <button class="menu import" data-mode="import">
+        <span class="icon">📦</span>
+        <span class="jp">輸入</span>
+        <span class="en">IMPORT</span>
+        <span class="desc">外国から日本へ<br>何を・どこから買う？</span>
+      </button>
+      <button class="menu country" data-mode="country">
+        <span class="icon">🌏</span>
+        <span class="jp">国</span>
+        <span class="en">COUNTRY</span>
+        <span class="desc">国ごとの貿易の特徴を<br>見分けよう</span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<section id="game" class="screen">
+  <div class="brand"><span class="badge">貿易ハンター</span></div>
+  <div class="card">
+    <div class="game-top">
+      <button id="backHome" class="home-btn">⌂ HOME</button>
+      <div class="meter"><div id="bar"></div></div>
+      <div id="score" class="score">0点</div>
+    </div>
+    <div id="modeLabel" class="mode"></div>
+    <div id="question" class="question"></div>
+    <div id="choices" class="choices"></div>
+    <div id="feedback" class="feedback">答えを選んでね。</div>
+    <button id="next" class="main-btn hidden">次の問題へ →</button>
+  </div>
+</section>
+
+<section id="result" class="screen">
+  <div class="brand"><span class="badge">RESULT</span></div>
+  <div class="card result">
+    <div class="emoji">🌏</div>
+    <h2 id="resultTitle"></h2>
+    <p id="resultText"></p>
+    <div class="actions">
+      <button id="retry" class="main-btn">もう一度あそぶ</button>
+      <button id="resultHome" class="main-btn secondary">HOMEへ戻る</button>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<script>
+const DATA = {
+  export: [
+    {q:"日本の自動車の輸出先、第1位はどこ？",choices:["アメリカ","中国","オーストラリア"],answer:0,exp:"正解はアメリカ。日本の自動車輸出で、とても大きな割合を占めます。"},
+    {q:"日本の自動車の輸出先、第2位はどこ？",choices:["カナダ","オーストラリア","サウジアラビア"],answer:1,exp:"第2位はオーストラリア。日本車がたくさん海を渡っています。"},
+    {q:"集積回路の輸出先、第1位はどこ？",choices:["中国","台湾","韓国"],answer:0,exp:"第1位は中国。台湾、香港、韓国なども上位です。"},
+    {q:"半導体等製造装置の輸出先、第1位はどこ？",choices:["アメリカ","中国","台湾"],answer:1,exp:"第1位は中国。半導体を作るための装置も、日本の重要な輸出品です。"},
+    {q:"鉄鋼の輸出先、第1位はどこ？",choices:["韓国","タイ","中国"],answer:0,exp:"第1位は韓国。タイ、中国も上位に入ります。"}
+  ],
+  import: [
+    {q:"日本が原油を最も多く輸入している国はどこ？",choices:["アメリカ","サウジアラビア","オーストラリア"],answer:1,exp:"第1位はサウジアラビア。日本のエネルギーを支える重要な相手国です。"},
+    {q:"液化石油ガス（LPG）の輸入先、第1位はどこ？",choices:["アメリカ","サウジアラビア","カタール"],answer:0,exp:"第1位はアメリカ。LPGは家庭や工業など、いろいろな場面で使われます。"},
+    {q:"液化天然ガス（LNG）の輸入先、第1位はどこ？",choices:["ロシア","オーストラリア","マレーシア"],answer:1,exp:"第1位はオーストラリア。日本の電力や都市ガスを支えています。"},
+    {q:"輸入とは、どんな貿易？",choices:["日本から外国へ売る","外国から日本へ買う","日本国内だけで売買する"],answer:1,exp:"輸入は、外国の商品や資源を日本へ入れることです。"},
+    {q:"日本が多く輸入するものとして、最も近いものは？",choices:["原油や天然ガス","新幹線","日本のアニメ"],answer:0,exp:"日本は、原油や天然ガスなどのエネルギー資源を多く輸入しています。"}
+  ],
+  country: [
+    {q:"日本の自動車が最も多く輸出される国は？",choices:["アメリカ","韓国","インド"],answer:0,exp:"アメリカです。自動車は、日本とアメリカの貿易を考える重要な品目です。"},
+    {q:"日本が原油を多く輸入する国は？",choices:["サウジアラビア","カナダ","フランス"],answer:0,exp:"サウジアラビアです。日本は中東から多くの原油を輸入しています。"},
+    {q:"日本が液化天然ガス（LNG）を最も多く輸入する国は？",choices:["オーストラリア","中国","ドイツ"],answer:0,exp:"オーストラリアです。資源の豊かな国として覚えましょう。"},
+    {q:"日本の鉄鋼の輸出先、第1位は？",choices:["韓国","ブラジル","イギリス"],answer:0,exp:"韓国です。日本に近く、産業の結びつきも強い国です。"},
+    {q:"日本の半導体等製造装置の輸出先、第1位は？",choices:["中国","エジプト","メキシコ"],answer:0,exp:"中国です。東アジアとの貿易は、日本にとってとても重要です。"}
+  ]
+};
+
+const LABELS = {
+  export:{jp:"輸出",en:"EXPORT"},
+  import:{jp:"輸入",en:"IMPORT"},
+  country:{jp:"国",en:"COUNTRY"}
+};
+
+let mode="export", list=[], index=0, score=0, locked=false;
+
+const screens={
+  home:document.getElementById("home"),
+  game:document.getElementById("game"),
+  result:document.getElementById("result")
+};
+const qEl=document.getElementById("question");
+const choicesEl=document.getElementById("choices");
+const feedbackEl=document.getElementById("feedback");
+const nextBtn=document.getElementById("next");
+const scoreEl=document.getElementById("score");
+const bar=document.getElementById("bar");
+const modeLabel=document.getElementById("modeLabel");
+
+function show(name){
+  Object.values(screens).forEach(s=>s.classList.remove("active"));
+  screens[name].classList.add("active");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function start(selected){
+  mode=selected;
+  list=DATA[mode];
+  index=0;score=0;
+  show("game");
+  render();
+}
+function render(){
+  locked=false;
+  const item=list[index];
+  modeLabel.className=`mode ${mode}`;
+  modeLabel.textContent=`${LABELS[mode].jp} / ${LABELS[mode].en}`;
+  qEl.textContent=item.q;
+  choicesEl.innerHTML="";
+  feedbackEl.textContent="答えを選んでね。";
+  nextBtn.classList.add("hidden");
+  item.choices.forEach((text,i)=>{
+    const b=document.createElement("button");
+    b.className="choice";
+    b.textContent=`${["A","B","C"][i]}　${text}`;
+    b.onclick=()=>answer(i,b);
+    choicesEl.appendChild(b);
+  });
+  bar.style.width=`${(index/list.length)*100}%`;
+  scoreEl.textContent=`${score}点`;
+}
+function answer(i,button){
+  if(locked)return;
+  locked=true;
+  const item=list[index];
+  const buttons=[...choicesEl.querySelectorAll(".choice")];
+  buttons[item.answer].classList.add("correct");
+  if(i===item.answer){
+    score+=20;
+    feedbackEl.textContent="🎉 正解！ "+item.exp;
+  }else{
+    button.classList.add("wrong");
+    feedbackEl.textContent="おしい！ "+item.exp;
+  }
+  scoreEl.textContent=`${score}点`;
+  nextBtn.classList.remove("hidden");
+}
+function finish(){
+  bar.style.width="100%";
+  show("result");
+  const title=score===100?"伝説の貿易ハンター！":score>=80?"世界商人級！":score>=60?"ナイスハント！":"もう一度で強くなる！";
+  document.getElementById("resultTitle").textContent=title;
+  document.getElementById("resultText").textContent=
+    `${LABELS[mode].jp} / ${LABELS[mode].en} ステージは ${score}点。まちがえた問題をもう一度やると、記憶が強くなるよ。`;
+}
+
+document.querySelectorAll(".menu").forEach(btn=>{
+  btn.addEventListener("click",()=>start(btn.dataset.mode));
+});
+nextBtn.onclick=()=>{
+  index++;
+  index<list.length?render():finish();
+};
+document.getElementById("backHome").onclick=()=>show("home");
+document.getElementById("resultHome").onclick=()=>show("home");
+document.getElementById("retry").onclick=()=>start(mode);
+
+</script>
+</body>
+</html>
