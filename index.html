@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#fff7df">
-<title>鈴の夏休みゲーム Trade-Hunter</title>
+<title>夏休みの地理ゲーム 貿易ハンター</title>
 <style>
 :root{
   --ink:#243044; --muted:#6b7890; --card:#fff;
@@ -85,6 +85,39 @@ h1{font-size:clamp(31px,6vw,50px);line-height:1.15;margin:12px 0 8px}
 .result p{color:var(--muted);line-height:1.7}
 .actions{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .secondary{background:#edf1f7;color:var(--ink)}
+
+/* Version 0.3 */
+.nav-buttons{
+  display:grid;
+  grid-template-columns:1fr 5fr;
+  gap:10px;
+  margin-top:14px;
+}
+.nav-buttons .main-btn{margin-top:0}
+.back-btn{
+  border:0;border-radius:17px;padding:16px 8px;
+  background:#edf1f7;color:var(--ink);
+  font-size:16px;font-weight:900;cursor:pointer
+}
+.back-btn:disabled{opacity:.38;cursor:default}
+.answer-mark{
+  position:fixed;inset:0;z-index:1000;
+  display:flex;align-items:center;justify-content:center;
+  pointer-events:none;
+  font-size:min(58vw,430px);
+  font-weight:900;line-height:1;
+  color:#ef4444;
+  opacity:0;transform:scale(.3);
+  text-shadow:0 8px 24px rgba(255,255,255,.95);
+}
+.answer-mark.show{animation:maruPop .85s ease-out both}
+@keyframes maruPop{
+  0%{opacity:0;transform:scale(.3) rotate(-10deg)}
+  28%{opacity:1;transform:scale(1.12) rotate(3deg)}
+  68%{opacity:1;transform:scale(1)}
+  100%{opacity:0;transform:scale(1.08)}
+}
+
 @media(max-width:650px){
   .menu-grid{grid-template-columns:1fr}
   .menu{min-height:128px}
@@ -140,7 +173,10 @@ h1{font-size:clamp(31px,6vw,50px);line-height:1.15;margin:12px 0 8px}
     <div id="question" class="question"></div>
     <div id="choices" class="choices"></div>
     <div id="feedback" class="feedback">答えを選んでね。</div>
-    <button id="next" class="main-btn hidden">次へ →</button>
+    <div class="nav-buttons">
+      <button id="prev" class="back-btn">← 戻る</button>
+      <button id="next" class="main-btn hidden">次へ →</button>
+    </div>
   </div>
 </section>
 
@@ -158,20 +194,21 @@ h1{font-size:clamp(31px,6vw,50px);line-height:1.15;margin:12px 0 8px}
 </section>
 
 </div>
+<div id="answerMark" class="answer-mark" aria-hidden="true">○</div>
 
 <script>
 const DATA = {
   export: [
-    {q:"自動車の輸出先、第1位は？",choices:["アメリカ","中国","オーストラリア"],answer:0,exp:"正解はアメリカ。日本の自動車輸出で、とても大きな割合を占めます。"},
-    {q:"自動車の輸出先、第2位は？",choices:["カナダ","オーストラリア","サウジアラビア"],answer:1,exp:"第2位はオーストラリア。日本車がたくさん海を渡っています。"},
-    {q:"集積回路の輸出先、第1位は？",choices:["中国","台湾","韓国"],answer:0,exp:"第1位は中国。台湾、香港、韓国なども上位です。"},
-    {q:"半導体等製造装置の輸出先、第1位は？",choices:["アメリカ","中国","台湾"],answer:1,exp:"第1位は中国。半導体を作るための装置も、日本の重要な輸出品です。"},
-    {q:"鉄鋼の輸出先、第1位は？",choices:["韓国","タイ","中国"],answer:0,exp:"第1位は韓国。タイ、中国も上位に入ります。"}
+    {q:"日本の自動車の輸出先、第1位はどこ？",choices:["アメリカ","中国","オーストラリア"],answer:0,exp:"正解はアメリカ。日本の自動車輸出で、とても大きな割合を占めます。"},
+    {q:"日本の自動車の輸出先、第2位はどこ？",choices:["カナダ","オーストラリア","サウジアラビア"],answer:1,exp:"第2位はオーストラリア。日本車がたくさん海を渡っています。"},
+    {q:"集積回路の輸出先、第1位はどこ？",choices:["中国","台湾","韓国"],answer:0,exp:"第1位は中国。台湾、香港、韓国なども上位です。"},
+    {q:"半導体等製造装置の輸出先、第1位はどこ？",choices:["アメリカ","中国","台湾"],answer:1,exp:"第1位は中国。半導体を作るための装置も、日本の重要な輸出品です。"},
+    {q:"鉄鋼の輸出先、第1位はどこ？",choices:["韓国","タイ","中国"],answer:0,exp:"第1位は韓国。タイ、中国も上位に入ります。"}
   ],
   import: [
-    {q:"原油の輸入先、第1位は？",choices:["アメリカ","サウジアラビア","オーストラリア"],answer:1,exp:"第1位はサウジアラビア。日本のエネルギーを支える重要な相手国です。"},
-    {q:"液化石油ガス（LPG）の輸入先、第1位は？",choices:["アメリカ","サウジアラビア","カタール"],answer:0,exp:"第1位はアメリカ。LPGは家庭や工業など、いろいろな場面で使われます。"},
-    {q:"液化天然ガス（LNG）の輸入先、第1位は？",choices:["ロシア","オーストラリア","マレーシア"],answer:1,exp:"第1位はオーストラリア。日本の電力や都市ガスを支えています。"},
+    {q:"日本が原油を最も多く輸入している国はどこ？",choices:["アメリカ","サウジアラビア","オーストラリア"],answer:1,exp:"第1位はサウジアラビア。日本のエネルギーを支える重要な相手国です。"},
+    {q:"液化石油ガス（LPG）の輸入先、第1位はどこ？",choices:["アメリカ","サウジアラビア","カタール"],answer:0,exp:"第1位はアメリカ。LPGは家庭や工業など、いろいろな場面で使われます。"},
+    {q:"液化天然ガス（LNG）の輸入先、第1位はどこ？",choices:["ロシア","オーストラリア","マレーシア"],answer:1,exp:"第1位はオーストラリア。日本の電力や都市ガスを支えています。"},
     {q:"輸入とは、どんな貿易？",choices:["日本から外国へ売る","外国から日本へ買う","日本国内だけで売買する"],answer:1,exp:"輸入は、外国の商品や資源を日本へ入れることです。"},
     {q:"日本が多く輸入するものとして、最も近いものは？",choices:["原油や天然ガス","新幹線","日本のアニメ"],answer:0,exp:"日本は、原油や天然ガスなどのエネルギー資源を多く輸入しています。"}
   ],
@@ -191,6 +228,7 @@ const LABELS = {
 };
 
 let mode="export", list=[], index=0, score=0, locked=false;
+let answers=[];
 
 const screens={
   home:document.getElementById("home"),
@@ -201,57 +239,103 @@ const qEl=document.getElementById("question");
 const choicesEl=document.getElementById("choices");
 const feedbackEl=document.getElementById("feedback");
 const nextBtn=document.getElementById("next");
+const prevBtn=document.getElementById("prev");
 const scoreEl=document.getElementById("score");
 const bar=document.getElementById("bar");
 const modeLabel=document.getElementById("modeLabel");
+const answerMark=document.getElementById("answerMark");
 
 function show(name){
   Object.values(screens).forEach(s=>s.classList.remove("active"));
   screens[name].classList.add("active");
   window.scrollTo({top:0,behavior:"smooth"});
 }
+
 function start(selected){
   mode=selected;
   list=DATA[mode];
-  index=0;score=0;
+  index=0;
+  score=0;
+  answers=Array(list.length).fill(null);
   show("game");
   render();
 }
+
+function recalculateScore(){
+  score=answers.reduce((total,selected,i)=>{
+    return total+(selected===list[i].answer?20:0);
+  },0);
+}
+
 function render(){
-  locked=false;
   const item=list[index];
+  const savedAnswer=answers[index];
+  locked=savedAnswer!==null;
+
   modeLabel.className=`mode ${mode}`;
   modeLabel.textContent=`${LABELS[mode].jp} / ${LABELS[mode].en}`;
   qEl.textContent=item.q;
   choicesEl.innerHTML="";
-  feedbackEl.textContent="答えを選んでね。";
-  nextBtn.classList.add("hidden");
+
   item.choices.forEach((text,i)=>{
     const b=document.createElement("button");
     b.className="choice";
     b.textContent=`${["A","B","C"][i]}　${text}`;
+
+    if(savedAnswer!==null){
+      if(i===item.answer)b.classList.add("correct");
+      if(i===savedAnswer && savedAnswer!==item.answer)b.classList.add("wrong");
+    }
+
     b.onclick=()=>answer(i,b);
     choicesEl.appendChild(b);
   });
-  bar.style.width=`${(index/list.length)*100}%`;
+
+  if(savedAnswer===null){
+    feedbackEl.textContent="答えを選んでね。";
+    nextBtn.classList.add("hidden");
+  }else if(savedAnswer===item.answer){
+    feedbackEl.textContent="🎉 正解！ "+item.exp;
+    nextBtn.classList.remove("hidden");
+  }else{
+    feedbackEl.textContent="おしい！ "+item.exp;
+    nextBtn.classList.remove("hidden");
+  }
+
+  prevBtn.disabled=index===0;
+  nextBtn.textContent=index===list.length-1 ? "結果を見る →" : "次へ →";
+  bar.style.width=`${((index+1)/list.length)*100}%`;
   scoreEl.textContent=`${score}点`;
 }
+
+function showCorrectMark(){
+  answerMark.classList.remove("show");
+  void answerMark.offsetWidth;
+  answerMark.classList.add("show");
+}
+
 function answer(i,button){
   if(locked)return;
   locked=true;
+  answers[index]=i;
+  recalculateScore();
+
   const item=list[index];
   const buttons=[...choicesEl.querySelectorAll(".choice")];
   buttons[item.answer].classList.add("correct");
+
   if(i===item.answer){
-    score+=20;
     feedbackEl.textContent="🎉 正解！ "+item.exp;
+    showCorrectMark();
   }else{
     button.classList.add("wrong");
     feedbackEl.textContent="おしい！ "+item.exp;
   }
+
   scoreEl.textContent=`${score}点`;
   nextBtn.classList.remove("hidden");
 }
+
 function finish(){
   bar.style.width="100%";
   show("result");
@@ -264,10 +348,23 @@ function finish(){
 document.querySelectorAll(".menu").forEach(btn=>{
   btn.addEventListener("click",()=>start(btn.dataset.mode));
 });
-nextBtn.onclick=()=>{
-  index++;
-  index<list.length?render():finish();
+
+prevBtn.onclick=()=>{
+  if(index>0){
+    index--;
+    render();
+  }
 };
+
+nextBtn.onclick=()=>{
+  if(index<list.length-1){
+    index++;
+    render();
+  }else{
+    finish();
+  }
+};
+
 document.getElementById("backHome").onclick=()=>show("home");
 document.getElementById("resultHome").onclick=()=>show("home");
 document.getElementById("retry").onclick=()=>start(mode);
