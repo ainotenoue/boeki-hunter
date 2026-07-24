@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#fff7df">
-<title>夏休みの地理ゲーム 貿易ハンター</title>
+<title>鈴の夏休みゲーム Trade-Hunter Version 0.4</title>
 <style>
 :root{
   --ink:#243044; --muted:#6b7890; --card:#fff;
@@ -63,10 +63,81 @@ h1{font-size:clamp(31px,6vw,50px);line-height:1.15;margin:12px 0 8px}
 .mode.import{background:var(--blue)}
 .mode.country{background:var(--purple)}
 .question{font-size:clamp(23px,4.4vw,32px);font-weight:900;line-height:1.4;margin:4px 0 18px}
-.choices{display:grid;gap:12px}
+.choices{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:14px;
+}
 .choice{
-  border:0;border-radius:17px;padding:16px 18px;background:var(--soft);
-  color:var(--ink);font-size:18px;font-weight:900;text-align:left;cursor:pointer
+  border:3px solid transparent;
+  border-radius:22px;
+  min-height:176px;
+  padding:18px 12px;
+  background:linear-gradient(180deg,#f8fbff,#edf4ff);
+  color:var(--ink);
+  font-weight:900;
+  text-align:center;
+  cursor:pointer;
+  box-shadow:0 10px 20px rgba(36,48,68,.10);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease,background .16s ease;
+}
+.choice:hover{
+  transform:translateY(-3px);
+  box-shadow:0 15px 25px rgba(36,48,68,.15);
+}
+.choice:active{transform:scale(.97)}
+.choice-letter{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:34px;height:34px;
+  border-radius:50%;
+  background:#fff;
+  color:var(--muted);
+  font-size:15px;
+  box-shadow:0 4px 10px rgba(36,48,68,.10);
+}
+.choice-icon{
+  min-height:54px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:46px;
+  line-height:1;
+}
+.choice-text{
+  display:block;
+  font-size:clamp(16px,2.4vw,20px);
+  line-height:1.35;
+  overflow-wrap:anywhere;
+}
+.choice.correct{
+  background:linear-gradient(180deg,#effff4,#dff8e8);
+  border-color:#32b66c;
+  color:#17683f;
+  animation:correctGlow .55s ease-out;
+}
+.choice.wrong{
+  background:linear-gradient(180deg,#fff3f3,#fde3e3);
+  border-color:#e75b5b;
+  color:#9c3030;
+  animation:wrongShake .38s ease-out;
+}
+@keyframes correctGlow{
+  0%{transform:scale(.96);box-shadow:0 0 0 rgba(50,182,108,0)}
+  45%{transform:scale(1.045);box-shadow:0 0 28px rgba(50,182,108,.52)}
+  100%{transform:scale(1);box-shadow:0 10px 20px rgba(36,48,68,.10)}
+}
+@keyframes wrongShake{
+  0%,100%{transform:translateX(0)}
+  25%{transform:translateX(-6px)}
+  50%{transform:translateX(6px)}
+  75%{transform:translateX(-3px)}
 }
 .choice.correct{background:var(--ok);color:#1d7047}
 .choice.wrong{background:var(--ng);color:#9c3030}
@@ -87,6 +158,7 @@ h1{font-size:clamp(31px,6vw,50px);line-height:1.15;margin:12px 0 8px}
 .secondary{background:#edf1f7;color:var(--ink)}
 
 /* Version 0.3 */
+/* Version 0.4: 横並びカード型選択肢・国旗/アイコン・正誤アニメーション */
 .nav-buttons{
   display:grid;
   grid-template-columns:1fr 5fr;
@@ -123,6 +195,14 @@ h1{font-size:clamp(31px,6vw,50px);line-height:1.15;margin:12px 0 8px}
   .menu{min-height:128px}
   .icon{font-size:40px}
   .actions{grid-template-columns:1fr}
+  .choices{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  .choice{min-height:150px;padding:14px 7px}
+  .choice-icon{font-size:38px;min-height:45px}
+  .choice-text{font-size:14px}
+}
+@media(max-width:420px){
+  .choices{grid-template-columns:1fr}
+  .choice{min-height:105px}
 }
 </style>
 </head>
@@ -227,6 +307,38 @@ const LABELS = {
   country:{jp:"国",en:"COUNTRY"}
 };
 
+
+const CHOICE_ICONS = {
+  "アメリカ":"🇺🇸",
+  "中国":"🇨🇳",
+  "オーストラリア":"🇦🇺",
+  "カナダ":"🇨🇦",
+  "サウジアラビア":"🇸🇦",
+  "台湾":"🇹🇼",
+  "韓国":"🇰🇷",
+  "タイ":"🇹🇭",
+  "カタール":"🇶🇦",
+  "ロシア":"🇷🇺",
+  "マレーシア":"🇲🇾",
+  "インド":"🇮🇳",
+  "フランス":"🇫🇷",
+  "ブラジル":"🇧🇷",
+  "イギリス":"🇬🇧",
+  "ドイツ":"🇩🇪",
+  "エジプト":"🇪🇬",
+  "メキシコ":"🇲🇽",
+  "日本から外国へ売る":"🚢",
+  "外国から日本へ買う":"📦",
+  "日本国内だけで売買する":"🏠",
+  "原油や天然ガス":"🛢️",
+  "新幹線":"🚄",
+  "日本のアニメ":"🎬"
+};
+
+function choiceIcon(text){
+  return CHOICE_ICONS[text] || "🌏";
+}
+
 let mode="export", list=[], index=0, score=0, locked=false;
 let answers=[];
 
@@ -280,7 +392,12 @@ function render(){
   item.choices.forEach((text,i)=>{
     const b=document.createElement("button");
     b.className="choice";
-    b.textContent=`${["A","B","C"][i]}　${text}`;
+    b.setAttribute("aria-label",`${["A","B","C"][i]} ${text}`);
+    b.innerHTML=`
+      <span class="choice-letter">${["A","B","C"][i]}</span>
+      <span class="choice-icon" aria-hidden="true">${choiceIcon(text)}</span>
+      <span class="choice-text">${text}</span>
+    `;
 
     if(savedAnswer!==null){
       if(i===item.answer)b.classList.add("correct");
