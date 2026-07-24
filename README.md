@@ -1,2 +1,2 @@
 # boeki-hunter
-夏休みの地理ゲーム「貿易ハンター」
+夏休みの地理ゲーム「Trade-Hunter」
