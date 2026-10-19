@@ -204,12 +204,17 @@ h1{font-size:clamp(31px,6vw,50px);line-height:1.15;margin:12px 0 8px}
   .choices{grid-template-columns:1fr}
   .choice{min-height:105px}
 }
+.plaza{position:absolute;left:0;top:0;display:inline-flex;align-items:center;min-height:34px;padding:0 12px;border-radius:999px;background:rgba(255,255,255,.92);border:2px solid #d9d4c8;color:#6b6760;font-size:13px;font-weight:800;text-decoration:none;font-family:inherit;line-height:1}
+.plaza:focus-visible{outline:3px solid #2766d1;outline-offset:2px}
+#home{position:relative}
+@media(max-width:700px){.plaza{position:static;margin-bottom:8px}}
 </style>
 </head>
 <body>
 <div class="wrap">
 
 <section id="home" class="screen active">
+  <a class="plaza" href="https://ainotenoue.github.io/">← ひろばへ</a>
   <div class="brand">
     <span class="badge">Project AIノオト #001</span>
     <h1>鈴の夏休みゲーム<br>TRADE HUNTER</h1>
